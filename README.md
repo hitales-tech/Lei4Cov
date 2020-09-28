@@ -10,5 +10,5 @@ OUTPUT: optimized vector embedding N by M data matrix
 # data_process
   - data processing
 # lei4cov
-  - 文献向量训练
+  - training literature Embeddings
 
