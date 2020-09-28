@@ -126,8 +126,8 @@ def generate_data(files=['./data/ace_entities.txt', './data/tmprss2_entities.txt
 
     total_doc_len += len(docs)
     print("semantics: ", len(semantics))
-    print("总共文献数: ", total_doc_len)
-    print("总实体数: ", total_ent_len)
+    print("total docs: ", total_doc_len)
+    print("total: ", total_ent_len)
     concept_ids = [PADDING]
     concept_texts = [PADDING]
     semantics = [PADDING]
@@ -135,21 +135,21 @@ def generate_data(files=['./data/ace_entities.txt', './data/tmprss2_entities.txt
         concept_ids.append(str(k))
         concept_texts.append(str(v[0]))
         semantics.append(str(v[1]))
-    print("实体id数:", len(set(concept_ids)) - 1, "实体数:", len(set(concept_texts)) - 1)
+    print("entities IDs count:", len(set(concept_ids)) - 1, "entities count:", len(set(concept_texts)) - 1)
 
     from collections import Counter
     counter = Counter(concept_texts).most_common(n=(len(set(concept_texts)) - len(set(concept_ids))))
     print("counter: ", counter)
     for k, v in concepts.items():
         if str(v[0]) in dict(counter):
-            print("重复k,v: ", k, v)
+            print("repeat k,v: ", k, v)
 
     ent_dct_length = len(text_to_int_dct)
-    # 保证全局统一编码
+    # 
     ent_encode = list()
     for item in concept_ids:
         if item not in text_to_int_dct:
-            # 忽略SEP
+            # ignore SEP
             text_to_int_dct[item] = ent_dct_length - 1
             ent_dct_length += 1
         ent_encode.append(text_to_int_dct.get(item))
@@ -263,14 +263,14 @@ if __name__ == '__main__':
     end_year = args.end_year
     pubmed_format = args.pubmed_format
 
-    # 获取>=start_year的文档
+    #
     if pubmed_format > 0:
         filtered_doc_dct = filter_year_doc(doc_file, start_year, end_year, n_split, n_parallel)
         print("doc_dct size:", len(filtered_doc_dct))
 
     files = os.listdir(input_dir)
     files_all = [os.path.abspath(os.path.join(input_dir, file)) for file in files if not file.startswith('.')]
-    # 分拆处理实体
+    # 
     length = len(files_all)
     slices, _ = split_data(n_split, length + 1)
     for i, (b, e) in enumerate(slices):
@@ -289,7 +289,7 @@ if __name__ == '__main__':
         generate_data(files=files, output_file=output_file + '.{}'.format(i),
                       entity_encode_file=entity_encode_file + '.{}'.format(i),
                       max_entity_length=max_entity_length, abbr_file=abbr_file, n_parallel=n_parallel)
-    # 合并n_split个结果
+    # 
     entity_encode = list()
     unique_ids = set()
     for i in range(n_split):
@@ -298,9 +298,9 @@ if __name__ == '__main__':
             for line in lines:
                 line = line.strip().split('\t')
                 if line[0] not in unique_ids:
-                    # 同一个concept_id的类别会不一样？
+                    #
                     entity_encode.append(line)
                     unique_ids.add(line[0])
     entity_encode = sorted(entity_encode, key=lambda x: int(x[-1]))
     np.savetxt(entity_encode_file, entity_encode, fmt="%s", delimiter='\t')
-    print("去重实体个数:", len(unique_ids))
+    print("duplicated:", len(unique_ids))
