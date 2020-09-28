@@ -3,7 +3,7 @@ import tensorflow as tf
 
 logging.basicConfig(level=logging.INFO)
 
-
+#
 def ln(inputs, epsilon=1e-8, scope="ln"):
     '''
     LayerNormaliztionf
